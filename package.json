@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "part3",
+  "homepage": "https://github.com/danilordossantos/fullstack-open-backend#readme",
+  "bugs": {
+    "url": "https://github.com/danilordossantos/fullstack-open-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danilordossantos/fullstack-open-backend.git"
+  },
+  "license": "MIT",
+  "author": "Danilo Abranches Ribeiro dos Santos",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
