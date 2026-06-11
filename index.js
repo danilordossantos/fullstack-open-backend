@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
+const cors = require('cors')
 
 let persons = [
     {
@@ -24,12 +26,27 @@ let persons = [
     }
 ]
 
+app.use(express.json())
+
+morgan.token('body', function (req) {
+    if (req.body) {
+        const { name, number } = req.body
+        return JSON.stringify({ name, number })
+    }
+})
+
+app.use(morgan(':method :url :status :res[content-length] :response-time ms :body'))
+
+app.use(cors())
+
+app.use(express.static('dist'))
+
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons/', (request, response) => {
-    response.json(persons)    
+    response.json(persons)
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -43,6 +60,53 @@ app.get('/api/persons/:id', (request, response) => {
     }
 })
 
-const PORT = 3000
+const generateId = () => {
+    const maxId = persons.length > 0 ? Math.max(...persons.map((n) => Number(n.id))) : 0
+    return Number(maxId + 1)
+}
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: 'content missing',
+        })
+    }
+
+    const name = persons.find(p => p.name === body.name)
+
+    if (name) {
+        return response.status(409).json({
+            error: 'name must be unique'
+        })
+    }
+
+    const person = {
+        id: generateId(),
+        name: body.name,
+        number: body.number
+    }
+
+    persons = persons.concat(person)
+
+    response.json(person)
+})
+
+app.get('/api/info', (request, response) => {
+    const count = persons.length
+    const date = new Date()
+    response.send(`
+        <p>Phonebook has info for ${count} people</p>
+        <p>${date}</p>`)
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id)
+    persons = persons.filter((person) => person.id !== id)
+    response.status(204).end()
+})
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
