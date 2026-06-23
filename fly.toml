@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for fullstack-open-backend-red-sound-9450 on 2026-06-10T00:53:53-03:00
+# fly.toml app configuration file generated for danilordossantosphonebook on 2026-06-10T00:53:53-03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'fullstack-open-backend-red-sound-9450'
+app = 'danilordossantosphonebook'
 primary_region = 'gru'
 
 [build]
