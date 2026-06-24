@@ -61,11 +61,24 @@ app.post('/api/persons', (request, response) => {
 })
 
 app.get('/api/info', (request, response) => {
-    const count = persons.length
-    const date = new Date()
-    response.send(`
-        <p>Phonebook has info for ${count} people</p>
-        <p>${date}</p>`)
+    Person.estimatedDocumentCount().then((count) => {
+        const date = new Date()
+        response.send(`
+            <p>Phonebook has info for ${count} people</p>
+            <p>${date}</p>`)
+    })
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const { name, number } = request.body
+    Person.findByIdAndUpdate(request.params.id, { name, number }, { returnDocument: 'after', runValidators: true, context: 'query' })
+        .then((updatedPerson) => {
+            if (!updatedPerson) {
+                return response.status(404).json({ error: 'person not found' })
+            }
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
