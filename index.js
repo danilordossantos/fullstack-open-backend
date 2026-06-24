@@ -80,6 +80,11 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).send({ error: err.message })
+})
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
