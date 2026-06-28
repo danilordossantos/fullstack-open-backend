@@ -2,12 +2,9 @@ require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
-const mongoose = require('mongoose')
 const Person = require('./models/person')
 
 const app = express()
-
-let persons = []
 
 morgan.token('body', function (req) {
     if (req.body) {
@@ -41,7 +38,7 @@ app.get('/api/persons/:id', (request, response) => {
     })
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name || !body.number) {
@@ -55,9 +52,11 @@ app.post('/api/persons', (request, response) => {
         number: body.number
     })
 
-    person.save().then((savedPerson) => {
-        response.json(savedPerson)
-    })
+    person.save()
+        .then((savedPerson) => {
+            response.json(savedPerson)
+        })
+        .catch(next)
 })
 
 app.get('/api/info', (request, response) => {
@@ -82,7 +81,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    Person.findByIdAndDelete(request.params.id).then((person) => {
+    Person.findByIdAndDelete(request.params.id).then(() => {
         response.status(204).end()
     })
 })
@@ -93,9 +92,15 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send({ error: err.message })
+app.use((error, request, response, _next) => {
+    console.error(error.message)
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    if (error.name === 'ValidationError') {
+        return response.status(400).send({ error: error.message })
+    }
+    response.status(500).send({ error: error.message })
 })
 
 const PORT = process.env.PORT
